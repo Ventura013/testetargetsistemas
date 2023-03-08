@@ -1,43 +1,68 @@
 package targetsistemas;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
 public class DistribuidoraEx3 {
-	public static void main(String[] args) {
 
-		double[] faturamentoDiario = { 1500.0, 1800.0, 2000.0, 1200.0, 1700.0, 0.0, 0.0 };
+    public static void main(String[] args) {
 
-		double menorFaturamento = faturamentoDiario[0];
-		for (int i = 1; i < faturamentoDiario.length; i++) {
-			if (faturamentoDiario[i] < menorFaturamento) {
-				menorFaturamento = faturamentoDiario[i];
-			}
-		}
+        List<Double> faturamento = new ArrayList<>();
 
-		double maiorFaturamento = faturamentoDiario[0];
-		for (int i = 1; i < faturamentoDiario.length; i++) {
-			if (faturamentoDiario[i] > maiorFaturamento) {
-				maiorFaturamento = faturamentoDiario[i];
-			}
-		}
+        try {
+            File xmlFile = new File("C:\\Users\\diego\\Downloads\\faturamento.xml");
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(xmlFile);
+            doc.getDocumentElement().normalize();
+            NodeList nList = doc.getElementsByTagName("dia");
+            for (int i = 0; i < nList.getLength(); i++) {
+                Element elem = (Element) nList.item(i);
+                double valor = Double.parseDouble(elem.getAttribute("valor"));
+                faturamento.add(valor);
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao ler o arquivo: " + e.getMessage());
+            return;
+        }
 
-		double somaFaturamento = 0.0;
-		int numDiasComFaturamento = 0;
-		for (int i = 0; i < faturamentoDiario.length; i++) {
-			if (faturamentoDiario[i] > 0.0) {
-				somaFaturamento += faturamentoDiario[i];
-				numDiasComFaturamento++;
-			}
-		}
-		double mediaMensal = somaFaturamento / numDiasComFaturamento;
+        double menor = faturamento.get(0);
+        double maior = faturamento.get(0);
+        double soma = 0;
+        int diasComFaturamento = 0;
 
-		int numDiasAcimaDaMedia = 0;
-		for (int i = 0; i < faturamentoDiario.length; i++) {
-			if (faturamentoDiario[i] > mediaMensal) {
-				numDiasAcimaDaMedia++;
-			}
-		}
+        for (double valor : faturamento) {
+            if (valor < menor) {
+                menor = valor;
+            }
+            if (valor > maior) {
+                maior = valor;
+            }
+            if (valor != 0) {
+                soma += valor;
+                diasComFaturamento++;
+            }
+        }
 
-		System.out.println("Menor faturamento diário: " + menorFaturamento);
-		System.out.println("Maior faturamento diário: " + maiorFaturamento);
-		System.out.println("Número de dias com faturamento diário acima da média: " + numDiasAcimaDaMedia);
-	}
+        double media = soma / diasComFaturamento;
+        int diasAcimaDaMedia = 0;
+
+        for (double valor : faturamento) {
+            if (valor > media) {
+                diasAcimaDaMedia++;
+            }
+        }
+
+        System.out.println("Menor valor de faturamento diário: " + menor);
+        System.out.println("Maior valor de faturamento diário: " + maior);
+        System.out.println("Número de dias com faturamento acima da média: " + diasAcimaDaMedia);
+    }
 }
